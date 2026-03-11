@@ -1,18 +1,7 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>TaskEarn</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-
-<body>
-
-<h1>TaskEarn</h1>
-<p>Complete tasks and earn rewards</p>
-
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyAKv0VS3D6HvhOs1ipunCr2SZ4K6ouepd8",
@@ -23,9 +12,74 @@ messagingSenderId: "521327374663",
 appId: "1:521327374663:web:6ac763c05f971a2df09c62"
 };
 
-initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
+window.signup = async function(){
+let email=document.getElementById("email").value;
+let password=document.getElementById("password").value;
+
+let user = await createUserWithEmailAndPassword(auth,email,password);
+
+await setDoc(doc(db,"users",user.user.uid),{
+balance:0
+});
+}
+
+window.login = function(){
+let email=document.getElementById("email").value;
+let password=document.getElementById("password").value;
+
+signInWithEmailAndPassword(auth,email,password);
+}
+
+window.logout = function(){
+signOut(auth);
+}
+
+window.completeTask = async function(){
+
+let user = auth.currentUser;
+
+let ref = doc(db,"users",user.uid);
+
+let snap = await getDoc(ref);
+
+let current = snap.data().balance;
+
+await updateDoc(ref,{
+balance: current + 1
+});
+
+loadBalance();
+}
+
+async function loadBalance(){
+
+let user = auth.currentUser;
+
+let ref = doc(db,"users",user.uid);
+
+let snap = await getDoc(ref);
+
+document.getElementById("balance").innerText =
+"$" + snap.data().balance;
+
+}
+
+onAuthStateChanged(auth,(user)=>{
+
+if(user){
+document.getElementById("auth").style.display="none";
+document.getElementById("dashboard").style.display="block";
+
+loadBalance();
+
+}else{
+document.getElementById("auth").style.display="block";
+document.getElementById("dashboard").style.display="none";
+}
+
+});
 </script>
-
-</body>
-</html>

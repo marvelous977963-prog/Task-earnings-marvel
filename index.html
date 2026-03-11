@@ -1,7 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>TaskEarn</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+body{
+font-family: Arial;
+text-align:center;
+background:#f2f2f2;
+padding:40px;
+}
+
+input{
+display:block;
+margin:10px auto;
+padding:10px;
+width:220px;
+}
+
+button{
+padding:10px 20px;
+margin:10px;
+font-size:16px;
+}
+
+#dashboard{
+display:none;
+background:white;
+padding:20px;
+border-radius:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>TaskEarn</h1>
+<p>Complete tasks and earn rewards</p>
+
+
+<div id="auth">
+
+<input id="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+
+<button onclick="signup()">Sign Up</button>
+<button onclick="login()">Login</button>
+
+</div>
+
+
+<div id="dashboard">
+
+<h2>Welcome to TaskEarn</h2>
+
+<h3>Your Balance: <span id="balance">$0</span></h3>
+
+<p>Complete tasks to earn money</p>
+
+<button onclick="completeTask()">Complete Task (+$1)</button>
+
+<br>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+
 <script type="module">
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
+
+import { getAuth,
+createUserWithEmailAndPassword,
+signInWithEmailAndPassword,
+signOut,
+onAuthStateChanged }
+
+from "https://www.gstatic.com/firebasejs/12.10.0/firebase-auth.js";
+
+import {
+getFirestore,
+doc,
+setDoc,
+getDoc,
+updateDoc
+}
+
+from "https://www.gstatic.com/firebasejs/12.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
 apiKey: "AIzaSyAKv0VS3D6HvhOs1ipunCr2SZ4K6ouepd8",
@@ -13,30 +103,52 @@ appId: "1:521327374663:web:6ac763c05f971a2df09c62"
 };
 
 const app = initializeApp(firebaseConfig);
+
 const auth = getAuth(app);
+
 const db = getFirestore(app);
 
+
+
 window.signup = async function(){
+
 let email=document.getElementById("email").value;
+
 let password=document.getElementById("password").value;
 
 let user = await createUserWithEmailAndPassword(auth,email,password);
 
 await setDoc(doc(db,"users",user.user.uid),{
+
 balance:0
+
 });
+
+alert("Account created!");
+
 }
 
+
+
 window.login = function(){
+
 let email=document.getElementById("email").value;
+
 let password=document.getElementById("password").value;
 
 signInWithEmailAndPassword(auth,email,password);
+
 }
 
+
+
 window.logout = function(){
+
 signOut(auth);
+
 }
+
+
 
 window.completeTask = async function(){
 
@@ -46,14 +158,19 @@ let ref = doc(db,"users",user.uid);
 
 let snap = await getDoc(ref);
 
-let current = snap.data().balance;
+let currentBalance = snap.data().balance;
 
 await updateDoc(ref,{
-balance: current + 1
+
+balance: currentBalance + 1
+
 });
 
 loadBalance();
+
 }
+
+
 
 async function loadBalance(){
 
@@ -63,23 +180,43 @@ let ref = doc(db,"users",user.uid);
 
 let snap = await getDoc(ref);
 
-document.getElementById("balance").innerText =
-"$" + snap.data().balance;
+document.getElementById("balance").innerText="$"+snap.data().balance;
 
 }
+
+
 
 onAuthStateChanged(auth,(user)=>{
 
 if(user){
+
 document.getElementById("auth").style.display="none";
+
 document.getElementById("dashboard").style.display="block";
 
 loadBalance();
 
-}else{
+}
+
+else{
+
 document.getElementById("auth").style.display="block";
+
 document.getElementById("dashboard").style.display="none";
+
 }
 
 });
+
+
 </script>
+
+</body>
+</html>
+<h3>Withdraw Money</h3>
+
+<input id="withdrawAmount" placeholder="Amount">
+
+<button onclick="withdraw()">Withdraw</button>
+
+<p id="withdrawMessage"></p>
